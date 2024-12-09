@@ -9,7 +9,7 @@ async function predictClassification(model, image) {
             .expandDims()
             .toFloat()
  
-        const classes = ['Melanocytic nevus', 'Squamous cell carcinoma', 'Vascular lesion'];
+        const classes = ['Cancer', 'Non-cancer'];
  
         const prediction = model.predict(tensor);
         const score = await prediction.data();
@@ -18,25 +18,15 @@ async function predictClassification(model, image) {
         const classResult = tf.argMax(prediction, 1).dataSync()[0];
         const label = classes[classResult];
  
-        let explanation, suggestion;
+        let suggestion;
  
-        if(label === 'Melanocytic nevus') {
-            explanation = "Melanocytic nevus adalah kondisi di mana permukaan kulit memiliki bercak warna yang berasal dari sel-sel melanosit, yakni pembentukan warna kulit dan rambut."
-            suggestion = "Segera konsultasi dengan dokter terdekat jika ukuran semakin membesar dengan cepat, mudah luka atau berdarah."
+        if (label === 'Cancer') {
+            suggestion = "Segera periksa ke dokter!";
+        } else if (label === 'Non-cancer') {
+            suggestion = "Penyakit kanker tidak terdeteksi.";
         }
- 
-        if(label === 'Squamous cell carcinoma') {
-            explanation = "Squamous cell carcinoma adalah jenis kanker kulit yang umum dijumpai. Penyakit ini sering tumbuh pada bagian-bagian tubuh yang sering terkena sinar UV."
-            suggestion = "Segera konsultasi dengan dokter terdekat untuk meminimalisasi penyebaran kanker."
-        }
- 
-        if(label === 'Vascular lesion') {
-            explanation = "Vascular lesion adalah penyakit yang dikategorikan sebagai kanker atau tumor di mana penyakit ini sering muncul pada bagian kepala dan leher."
-            suggestion = "Segera konsultasi dengan dokter terdekat untuk mengetahui detail terkait tingkat bahaya penyakit."
-        
-        }
- 
-        return { confidenceScore, label, explanation, suggestion };
+
+        return { suggestion };
     } catch (error) {
         throw new InputError(`Terjadi kesalahan input: ${error.message}`)
     }
